@@ -1,0 +1,395 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="color-scheme" content="light">
+<title>样本测试页 · GitHub Pages 交互自检</title>
+<style>
+  /* ---------- 基础重置 ---------- */
+  *, *::before, *::after { box-sizing: border-box; }
+
+  html { -webkit-text-size-adjust: 100%; }
+
+  body {
+    margin: 0;
+    min-height: 100vh;
+    min-height: 100dvh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: clamp(18px, 4vw, 34px);
+    padding: clamp(20px, 5vw, 48px) clamp(16px, 4vw, 32px);
+    padding-top: max(clamp(20px, 5vw, 48px), env(safe-area-inset-top));
+    padding-bottom: max(clamp(20px, 5vw, 48px), env(safe-area-inset-bottom));
+    font-family: system-ui, -apple-system, "Segoe UI", "PingFang SC",
+                 "Hiragino Sans GB", "Microsoft YaHei", "Noto Sans SC", sans-serif;
+    color: #0f172a;
+    background:
+      radial-gradient(60vw 60vw at 50% 0%, #e0e7ff 0%, rgba(224, 231, 255, 0) 70%),
+      radial-gradient(50vw 50vw at 50% 100%, #dbeafe 0%, rgba(219, 234, 254, 0) 70%),
+      linear-gradient(180deg, #f8fafc 0%, #eef2ff 100%);
+  }
+
+  /* ---------- 顶部标题 ---------- */
+  .site-header {
+    text-align: center;
+    max-width: 40ch;
+  }
+
+  .site-header h1 {
+    margin: 0;
+    font-size: clamp(1.9rem, 7vw, 3.25rem);
+    line-height: 1.15;
+    letter-spacing: 0.04em;
+    font-weight: 800;
+    color: #1e1b4b;
+    text-wrap: balance;
+  }
+
+  .site-header p {
+    margin: 10px 0 0;
+    font-size: clamp(0.82rem, 3vw, 0.95rem);
+    color: #64748b;
+    letter-spacing: 0.02em;
+  }
+
+  /* ---------- 中间的圆形 ---------- */
+  .stage {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 18px;
+  }
+
+  .orb {
+    position: relative;
+    width: clamp(140px, 44vw, 200px);
+    aspect-ratio: 1 / 1;
+    display: grid;
+    place-items: center;
+    padding: 0;
+    border: 0;
+    border-radius: 50%;
+    cursor: pointer;
+    color: #fff;
+    font: inherit;
+    font-weight: 700;
+    font-size: clamp(0.95rem, 3.5vw, 1.15rem);
+    line-height: 1.35;
+    letter-spacing: 0.06em;
+    text-align: center;
+    -webkit-tap-highlight-color: transparent;
+    touch-action: manipulation;
+    background: radial-gradient(circle at 34% 28%, #a5b4fc 0%, #6366f1 42%, #4338ca 72%, #312e81 100%);
+    box-shadow:
+      0 22px 45px -14px rgba(67, 56, 202, 0.65),
+      inset 0 -8px 20px rgba(15, 23, 42, 0.28),
+      inset 0 6px 14px rgba(255, 255, 255, 0.22);
+    transition: transform 0.18s ease, box-shadow 0.18s ease;
+  }
+
+  .orb:hover { transform: translateY(-2px) scale(1.02); }
+  .orb:active { transform: scale(0.96); }
+  .orb:focus-visible {
+    outline: 3px solid #312e81;
+    outline-offset: 6px;
+  }
+
+  /* 呼吸光环 */
+  .orb::before {
+    content: "";
+    position: absolute;
+    inset: -12px;
+    border-radius: 50%;
+    border: 2px solid rgba(99, 102, 241, 0.45);
+    animation: ring 2.8s ease-out infinite;
+    pointer-events: none;
+  }
+
+  .orb::after {
+    content: "";
+    position: absolute;
+    inset: 14% 22% 62% 24%;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.32);
+    filter: blur(6px);
+    pointer-events: none;
+  }
+
+  @keyframes ring {
+    0%   { transform: scale(0.94); opacity: 0.85; }
+    70%  { transform: scale(1.16); opacity: 0; }
+    100% { transform: scale(1.16); opacity: 0; }
+  }
+
+  .hint {
+    margin: 0;
+    max-width: 26ch;
+    text-align: center;
+    font-size: clamp(0.8rem, 3vw, 0.9rem);
+    line-height: 1.6;
+    color: #64748b;
+    text-wrap: balance;
+  }
+
+  /* ---------- 页脚 ---------- */
+  .site-footer {
+    font-size: 0.76rem;
+    letter-spacing: 0.05em;
+    color: #94a3b8;
+    text-align: center;
+  }
+
+  /* ---------- popover 信息框 ---------- */
+  .info-card {
+    position: fixed;
+    inset: 0;
+    width: min(90vw, 380px);
+    height: fit-content;
+    max-height: 85vh;
+    max-height: 85dvh;
+    margin: auto;
+    padding: clamp(20px, 5vw, 28px);
+    overflow: auto;
+    border: 1px solid rgba(99, 102, 241, 0.18);
+    border-radius: 20px;
+    background: #ffffff;
+    color: #0f172a;
+    box-shadow: 0 30px 70px -20px rgba(15, 23, 42, 0.45);
+    font-family: inherit;
+    font-size: 0.95rem;
+    line-height: 1.65;
+  }
+
+  .info-card:popover-open {
+    animation: pop-in 0.2s ease-out;
+  }
+
+  .info-card::backdrop {
+    background: rgba(15, 23, 42, 0.45);
+    backdrop-filter: blur(2px);
+    animation: fade-in 0.2s ease-out;
+  }
+
+  @keyframes pop-in {
+    from { opacity: 0; transform: translateY(10px) scale(0.96); }
+    to   { opacity: 1; transform: translateY(0) scale(1); }
+  }
+
+  @keyframes fade-in {
+    from { opacity: 0; }
+    to   { opacity: 1; }
+  }
+
+  .badge {
+    display: inline-block;
+    margin: 0 0 10px;
+    padding: 3px 10px;
+    border-radius: 999px;
+    font-size: 0.66rem;
+    font-weight: 700;
+    letter-spacing: 0.14em;
+    color: #4338ca;
+    background: #eef2ff;
+  }
+
+  .info-card h2 {
+    margin: 0 0 10px;
+    font-size: clamp(1.15rem, 4.4vw, 1.4rem);
+    line-height: 1.3;
+    color: #1e1b4b;
+  }
+
+  .info-card p {
+    margin: 0;
+    color: #475569;
+  }
+
+  .info-card code {
+    padding: 1px 5px;
+    border-radius: 5px;
+    background: #f1f5f9;
+    font-size: 0.88em;
+    color: #4338ca;
+    word-break: break-word;
+  }
+
+  .meta {
+    margin: 18px 0 0;
+    padding: 14px 0 0;
+    border-top: 1px dashed #e2e8f0;
+    display: grid;
+    gap: 8px;
+    font-size: 0.82rem;
+  }
+
+  .meta > div {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 12px;
+  }
+
+  .meta dt { color: #94a3b8; }
+  .meta dd {
+    margin: 0;
+    font-variant-numeric: tabular-nums;
+    color: #334155;
+    text-align: right;
+  }
+
+  .card-close {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    width: 36px;
+    height: 36px;
+    display: grid;
+    place-items: center;
+    padding: 0;
+    border: 0;
+    border-radius: 50%;
+    background: #f1f5f9;
+    color: #64748b;
+    font-size: 1.25rem;
+    line-height: 1;
+    cursor: pointer;
+    transition: background 0.15s ease, color 0.15s ease;
+  }
+
+  .card-close:hover { background: #e2e8f0; color: #1e1b4b; }
+  .card-close:focus-visible { outline: 2px solid #4f46e5; outline-offset: 2px; }
+
+  /* ---------- 不支持 popover 时的脚本兼容样式 ---------- */
+  .no-popover .info-card { display: none; z-index: 10; }
+  .no-popover .info-card.is-open { display: block; }
+
+  .no-popover.dimmed::before {
+    content: "";
+    position: fixed;
+    inset: 0;
+    z-index: 9;
+    background: rgba(15, 23, 42, 0.45);
+  }
+
+  /* ---------- 动效偏好 ---------- */
+  @media (prefers-reduced-motion: reduce) {
+    .orb, .orb::before, .info-card:popover-open,
+    .info-card::backdrop { animation: none; transition: none; }
+    .orb:hover, .orb:active { transform: none; }
+  }
+</style>
+</head>
+<body>
+
+  <header class="site-header">
+    <h1>样本测试页</h1>
+    <p>GitHub Pages 部署与交互自检</p>
+  </header>
+
+  <main class="stage">
+    <button class="orb" id="orb" type="button" popovertarget="infoCard" aria-label="打开交互测试信息框">
+      <span>点击<br>测试</span>
+    </button>
+    <p class="hint">点击中间的圆形，查看弹出的信息框</p>
+  </main>
+
+  <footer class="site-footer">单文件 · 原生 HTML / CSS / JS · 无外部依赖</footer>
+
+  <!-- 信息框：由 HTML 原生 popover 属性弹出 -->
+  <div id="infoCard" class="info-card" popover>
+    <button class="card-close" type="button" popovertarget="infoCard" popovertargetaction="hide" aria-label="关闭信息框">×</button>
+    <p class="badge">POPOVER</p>
+    <h2>交互测试成功</h2>
+    <p>
+      这个信息框由浏览器原生的 <code>popover</code> 属性弹出，没有使用
+      <code>alert()</code>。能弹出它，说明页面文件已经正确加载，
+      CSS 与 JavaScript 也都在正常工作。
+    </p>
+    <dl class="meta">
+      <div><dt>页面加载时间</dt><dd id="loadedAt">—</dd></div>
+      <div><dt>当前视口宽度</dt><dd id="viewportWidth">—</dd></div>
+      <div><dt>popover 支持</dt><dd id="popoverSupport">—</dd></div>
+    </dl>
+  </div>
+
+<script>
+  (function () {
+    'use strict';
+
+    var card = document.getElementById('infoCard');
+    var orb = document.getElementById('orb');
+    var closeBtn = card.querySelector('.card-close');
+    var loadedAtEl = document.getElementById('loadedAt');
+    var viewportEl = document.getElementById('viewportWidth');
+    var supportEl = document.getElementById('popoverSupport');
+
+    var loadedAt = new Date();
+    var supportsPopover = 'popover' in HTMLElement.prototype;
+
+    function pad(n) { return n < 10 ? '0' + n : String(n); }
+
+    function formatTime(d) {
+      return d.getFullYear() + '-' + pad(d.getMonth() + 1) + '-' + pad(d.getDate()) +
+             ' ' + pad(d.getHours()) + ':' + pad(d.getMinutes()) + ':' + pad(d.getSeconds());
+    }
+
+    // 打开时刷新实测数据，顺便证明 JS 在运行
+    function updateMeta() {
+      loadedAtEl.textContent = formatTime(loadedAt);
+      viewportEl.textContent = window.innerWidth + ' × ' + window.innerHeight + ' px';
+      supportEl.textContent = supportsPopover ? '支持（原生）' : '不支持（脚本兼容）';
+    }
+
+    updateMeta();
+
+    if (!supportsPopover) {
+      // 老浏览器的降级方案：手动显示 / 隐藏
+      document.documentElement.classList.add('no-popover');
+
+      var openCard = function () {
+        card.classList.add('is-open');
+        document.documentElement.classList.add('dimmed');
+        updateMeta();
+      };
+
+      var closeCard = function () {
+        card.classList.remove('is-open');
+        document.documentElement.classList.remove('dimmed');
+      };
+
+      orb.addEventListener('click', function (event) {
+        event.preventDefault();
+        openCard();
+      });
+
+      closeBtn.addEventListener('click', function (event) {
+        event.preventDefault();
+        closeCard();
+        orb.focus();
+      });
+
+      document.addEventListener('click', function (event) {
+        if (!card.classList.contains('is-open')) { return; }
+        if (card.contains(event.target) || orb.contains(event.target)) { return; }
+        closeCard();
+      });
+
+      document.addEventListener('keydown', function (event) {
+        if (event.key === 'Escape' && card.classList.contains('is-open')) {
+          closeCard();
+          orb.focus();
+        }
+      });
+    } else {
+      card.addEventListener('toggle', function (event) {
+        if (event.newState === 'open') { updateMeta(); }
+      });
+    }
+  })();
+</script>
+
+</body>
+</html>
